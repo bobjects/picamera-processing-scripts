@@ -1,0 +1,4 @@
+**/.idea
+**/.vscode
+**/*.pyc
+push-to-github.sh
