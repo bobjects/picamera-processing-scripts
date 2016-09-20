@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+
+find . -iname "must-rotate-180-*.jpg" -exec /Volumes/WD4TB/photos/pi-timelapses/rotate-180-jpg-file-named {} \;
+

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ ! -f ./timeexposure.png ]
+then
+	if ls *.jpg &> /dev/null
+	then
+		/Volumes/WD4TB/photos/pi-timelapses/timelapse-to-time-exposure.py "*.jpg"
+	fi
+fi

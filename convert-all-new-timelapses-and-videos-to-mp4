@@ -1,0 +1,44 @@
+#!/bin/bash
+
+basedirectory=/Volumes/WD4TB/photos/pi-timelapses
+
+for timelapsedirectory in $basedirectory/captures/timelapse-*
+do
+        if [ -d $timelapsedirectory ]
+        then
+		timelapsename=`basename $timelapsedirectory`
+		videofile=$timelapsedirectory/$timelapsename.mp4
+		if [ ! -f $videofile ]
+		then
+			echo "Checking if this is a JPEG timelapse in $timelapsedirectory ."
+			# if ls "$timelapsedirectory/*.jpg" &> /dev/null; then
+			if [ -f $timelapsedirectory/$timelapsename.h264 ]; then
+				# This is a direct-to-video timelapse.
+				ffmpeg -r 30 -i $timelapsedirectory/$timelapsename.h264 -vcodec copy $videofile
+			else
+				# This is a JPEG timelapse.
+				cd $timelapsedirectory
+				echo "Rotating JPEGs if needed"
+				../../rotate-180-all-in-working-directory-as-needed
+				# echo "Creating time exposure if needed"
+				# ../../create-time-exposure-in-working-directory-as-needed
+				jpegexpression=mf://$timelapsedirectory/*.jpg
+				echo "Creating $videofile from $jpegexpression"
+				# first line below is for AVI format, second is for mp4, third is for mp4 scaled for iPad, fourth is for mp4 scaled for iPad x264
+				# AVI format, no sound
+				# mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:aspect=16/9:vbitrate=8000000 -vf scale=1920:1080 -o $videofile -mf type=jpeg:fps=30 $jpegexpression
+				# MP4 format, MPEG4 codec, no sound
+				# mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:aspect=16/9:vbitrate=8000000 -vf scale=1920:1080 -of lavf -lavfopts format=mp4 -o $videofile-scale-for-ipad.mp4 -mf type=jpeg:fps=30 $jpegexpression
+				# MP4 format, no sound, H264 codec, scaled for iPad  -  This is iPad compatible.
+				mencoder -nosound -ovc x264 -x264encopts crf=28:vbv_maxrate=1500:nocabac:global_header:frameref=3:threads=auto:bframes=0:subq=6:mixed-refs=0:weightb=0:8x8dct=1:me=umh:partitions=all:qp_step=4:qcomp=0.7:trellis=1:direct_pred=auto -vf scale=1280:-3 -of lavf -lavfopts format=mp4 -o $videofile -mf type=jpeg:fps=30 $jpegexpression
+			fi
+			# add an audio track.
+			ffmpeg -i /Users/bob/Music/iTunes/iTunes\ Media/Music/Staind/Dysfunction/05\ -\ Mudshovel.mp3 -r 30 -i $videofile -shortest -vcodec copy -acodec aac -strict experimental $videofile-sound.mp4
+
+			cp $videofile /Users/bob/podcast
+			cp $videofile-sound.mp4 /Users/bob/podcast
+		fi
+        fi
+done
+
+

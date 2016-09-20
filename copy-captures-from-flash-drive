@@ -1,0 +1,7 @@
+#!/bin/bash
+
+basedirectory=/Volumes/WD4TB/photos/pi-timelapses
+
+cp -av /Volumes/PICAMERA/captures $basedirectory
+
+
